@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Readable Timer</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      color: black;
+      margin: 0;
+      padding: 0;
+      background-color: white;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .timer-container {
+      display: flex;
+      width: 90%;
+      height: 80vh;
+      border-radius: 20px;
+      /* box-shadow: 0 10px 30px rgba(0,0,0,0.1); */
+      overflow: hidden;
+    }
+
+    /* First Column - Detail column */
+    .column-labels {
+      width: 15%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      padding: 20px 0;
+      font-size: 10vw;
+      font-weight: bold;
+    }
+
+    /* Second Column - Three squares */
+    .column-squares {
+      width: 20%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      padding: 30px 0;
+    }
+
+    .square {
+      width: 80%;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .square#shoot {
+      background-color: green;
+    }
+
+    .square#warn {
+      background-color: yellow;
+    }
+
+    .square#stop {
+      background-color: red;
+    }
+
+    /* Third Column - Timer display */
+    .column-timer {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .timer-display {
+      font-size: 40vw;
+      letter-spacing: -3vw;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Controls */
+    #timer-controls {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #2ecc71;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #27ae60;
+    }
+
+    #btnStop {
+      background-color: #e74c3c;
+    }
+
+    #btnStop:hover {
+      background-color: #c0392b;
+    }
+
+    #reset {
+      background-color: #f39c12;
+    }
+
+    #reset:hover {
+      background-color: #d35400;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="timer-container">
+    <div class="column-labels">
+      <div class="label">A</div>
+      <div class="label">B</div>
+    </div>
+    <div class="column-squares">
+      <div class="square" id="shoot"></div>
+      <div class="square" id="warn"></div>
+      <div class="square" id="stop"></div>
+    </div>
+    <div class="column-timer">
+      <div class="timer-display" id="timer">180</div>
+    </div>
+  </div>
+
+  <div id="timer-controls">
+    <button id="start">Start</button>
+    <button id="btnStop">Stop</button>
+    <button id="reset">Reset</button>
+    <button id="fullscreen">Fullscreen</button>
+    <button id="btnPopout">Pop-out ↗</button>
+  </div>
+
+</body>
+<footer>
+  <script>
+    // Popout html
+    const popupHTML = /*html*/`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Popup Controls</title>
+            <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #f0f0f0;
+                margin: 0;
+                padding: 20px;
+            }
+            h2 {
+                color: #444;
+            }
+            button {
+                padding: 10px 15px;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #218838;
+            }
+            </style>
+        </head>
+        <body>
+            <h2>Archery timer controls</h2>
+            <button onclick="window.opener.startTimer()">Start</button>
+            <button onclick="window.opener.stopTimer()">Stop</button>
+            <button onclick="window.opener.showMenu(); window.close()">Close</button>
+        </body>
+        </html>
+        `;
+
+    // Timer functionality
+    let seconds = 180;
+    let timer;
+    let isRunning = false;
+
+    const timerDisplay = document.getElementById('timer');
+    const timerControlsDiv = document.getElementById('timer-controls');
+    const startButton = document.getElementById('start');
+    const stopButton = document.getElementById('btnStop');
+    const resetButton = document.getElementById('reset');
+    const fullscreenButton = document.getElementById('fullscreen')
+    const popoutButton = document.getElementById('btnPopout');
+
+    // Update the timer display
+    function updateTimer() {
+      timerDisplay.textContent = seconds.toString();
+    }
+
+    // Start the timer
+    function startTimer() {
+      if (!isRunning) {
+        isRunning = true;
+        timer = setInterval(() => {
+          seconds--;
+          updateTimer();
+
+          if (seconds <= 0) {
+            clearInterval(timer);
+            isRunning = false;
+            // Play a sound or visual alert when timer hits zero
+            document.body.style.backgroundColor = '#ffcccc';
+            setTimeout(() => {
+              document.body.style.backgroundColor = '#f0f0f0';
+            }, 500);
+          }
+        }, 1000);
+      }
+    }
+
+    /* Button Functions */
+
+    function stopTimer() {
+      clearInterval(timer);
+      isRunning = false;
+    }
+
+    function resetTimer() {
+      stopTimer();
+      seconds = 180;
+      updateTimer();
+    }
+
+    function goFullscreen() {
+      document.documentElement.requestFullscreen();
+    }
+
+    function createPopout() {
+      const popout = window.open('', '', 'width=400, height=500');
+      popout.document.write(popupHTML);
+      popout.document.close();
+      timerControlsDiv.style.visibility = 'hidden';
+    }
+
+    function showMenu() {
+      timerControlsDiv.style.visibility = 'visible';
+    }
+
+    // Event listeners
+    startButton.addEventListener('click', startTimer);
+    stopButton.addEventListener('click', stopTimer);
+    resetButton.addEventListener('click', resetTimer);
+    fullscreen.addEventListener('click', goFullscreen);
+    popoutButton.addEventListener('click', createPopout);
+
+    // Initialize the timer display
+    updateTimer();
+  </script>
+</footer>
+
+</html>
