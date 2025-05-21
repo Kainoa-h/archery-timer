@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Readable Timer</title>
+  <title>Readable Timer main</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -146,6 +146,7 @@
     <button id="reset">Reset</button>
     <button id="fullscreen">Fullscreen</button>
     <button id="btnPopout">Pop-out ↗</button>
+    <button id="btnTest" onclick="buzz(0)">test</button>
   </div>
 
 </body>
@@ -188,6 +189,55 @@
         </body>
         </html>
         `;
+
+    // Buzzer
+    function buzz(duration) {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Main oscillator
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'square'; // Sharp, buzzy tone
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // Deeper than pure sine whistle
+
+      // Gain for shaping volume envelope
+      const gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+
+      // Bandpass filter to mimic whistle tube resonance
+      const filter = audioContext.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, audioContext.currentTime); // Focused around 1200 Hz
+      filter.Q.setValueAtTime(15, audioContext.currentTime); // Narrow resonance
+
+      // Create tremolo (amplitude modulation for "chirpy" effect)
+      const tremolo = audioContext.createOscillator();
+      tremolo.frequency.setValueAtTime(5, audioContext.currentTime); // Fast on/off ~25 Hz
+
+      const tremoloGain = audioContext.createGain();
+      tremoloGain.gain.setValueAtTime(0.1, audioContext.currentTime); // Depth of modulation
+
+      // Route tremolo to gain control
+      tremolo.connect(tremoloGain);
+      tremoloGain.connect(gainNode.gain);
+
+      // Connect signal chain
+      oscillator.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Start everything
+      oscillator.start();
+      tremolo.start();
+
+      // Envelope (quick fade in, quick fade out)
+      const now = audioContext.currentTime;
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(9, now + 0.02); // Sharp attack
+      gainNode.gain.linearRampToValueAtTime(0.9, now + 0.5);  // Quick release
+
+      oscillator.stop(now + 0.5);
+      tremolo.stop(now + 0.5);
+    }
 
     // Timer functionality
     let seconds = 180;
