@@ -23,8 +23,6 @@
       width: 90%;
       height: 80vh;
       border-radius: 20px;
-      /* box-shadow: 0 10px 30px rgba(0,0,0,0.1); */
-      overflow: hidden;
     }
 
     /* First Column - Detail column */
@@ -233,16 +231,24 @@
       const now = audioContext.currentTime;
       gainNode.gain.setValueAtTime(0, now);
       gainNode.gain.linearRampToValueAtTime(9, now + 0.02); // Sharp attack
-      gainNode.gain.linearRampToValueAtTime(0.9, now + 0.5);  // Quick release
 
-      oscillator.stop(now + 0.5);
-      tremolo.stop(now + 0.5);
+      oscillator.stop(now + duration);
+      tremolo.stop(now + duration);
+
+      oscillator.onended = () => {
+        audioContext.close();
+      };
     }
 
+    // Timer Settings
+    let set_seconds = 180;
+
     // Timer functionality
-    let seconds = 180;
+    let seconds = set_seconds;
     let timer;
-    let isRunning = false;
+    // let isRunning = false;
+    let timerState = 0;
+    // 0:stoped, 1:standby, 2:live
 
     const timerDisplay = document.getElementById('timer');
     const timerControlsDiv = document.getElementById('timer-controls');
@@ -259,8 +265,12 @@
 
     // Start the timer
     function startTimer() {
-      if (!isRunning) {
-        isRunning = true;
+      if (timerState = 0) {
+        isRunning = 1;
+        buzz(0.5)
+        setTimeout(() => {
+          buzz(0.5)
+        }, 700);
         timer = setInterval(() => {
           seconds--;
           updateTimer();
@@ -281,13 +291,20 @@
     /* Button Functions */
 
     function stopTimer() {
+      buzz(0.5)
+      setTimeout(() => {
+        buzz(0.5)
+      }, 700);
+      setTimeout(() => {
+        buzz(0.8)
+      }, 1400);
       clearInterval(timer);
       isRunning = false;
     }
 
     function resetTimer() {
       stopTimer();
-      seconds = 180;
+      seconds = set_seconds;
       updateTimer();
     }
 
