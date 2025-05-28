@@ -189,6 +189,9 @@
         `;
 
     // Buzzer
+    const SHORT_BUZZ_DURATION = 0.5;
+    const LONG_BUZZ_DURATION = 0.8;
+    const BUZZ_INTERVAL_DURATION = 200;
     function buzz(duration) {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -239,12 +242,30 @@
         audioContext.close();
       };
     }
+    function buzzOnce() {buzz(SHORT_BUZZ_DURATION);}
+    function buzzTwice() {
+      buzz(SHORT_BUZZ_DURATION);
+      setTimeout(() => {
+        buzz(SHORT_BUZZ_DURATION);
+      }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 1000);
+    }
+    function buzzThrice() {
+      buzz(SHORT_BUZZ_DURATION);
+      setTimeout(() => {
+        buzz(SHORT_BUZZ_DURATION);
+      }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 1000);
+      setTimeout(() => {
+        buzz(LONG_BUZZ_DURATION);
+      }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 1000);
+    }
 
     // Timer Settings
-    let set_seconds = 180;
+    let set_seconds = 5;
+    let set_warning = 5;
 
     // Timer functionality
     let seconds = set_seconds;
+    let warning = set_warning;
     let timer;
     // let isRunning = false;
     let timerState = 0;
@@ -259,53 +280,64 @@
     const popoutButton = document.getElementById('btnPopout');
 
     // Update the timer display
-    function updateTimer() {
-      timerDisplay.textContent = seconds.toString();
+    function updateTimer(num) {
+      timerDisplay.textContent = num.toString();
     }
 
     // Start the timer
+    // TODO: refactor indent hell
     function startTimer() {
-      if (timerState = 0) {
-        isRunning = 1;
-        buzz(0.5)
-        setTimeout(() => {
-          buzz(0.5)
-        }, 700);
-        timer = setInterval(() => {
-          seconds--;
-          updateTimer();
+      if (timerState == 0) {
+        timerState = 1;
+        buzzTwice();
 
-          if (seconds <= 0) {
+        timer = setInterval(() => {
+          warning--;
+          updateTimer(warning);
+
+          if (warning <= 0) {
             clearInterval(timer);
-            isRunning = false;
-            // Play a sound or visual alert when timer hits zero
-            document.body.style.backgroundColor = '#ffcccc';
+            timerState = 2;
+            buzzOnce();
+            document.body.style.backgroundColor = '#00ff00';
             setTimeout(() => {
-              document.body.style.backgroundColor = '#f0f0f0';
+              document.body.style.backgroundColor = '#FFFFFF';
             }, 500);
+
+            timer = setInterval(() => {
+              seconds--;
+              updateTimer(seconds);
+
+              if (seconds <= 0) {
+                clearInterval(timer);
+                timerState = 0;
+
+                stopTimer();
+              }
+            }, set_seconds * 100 + 100);
+
           }
-        }, 1000);
+        }, set_warning * 100 + 100);
       }
     }
 
     /* Button Functions */
 
     function stopTimer() {
-      buzz(0.5)
-      setTimeout(() => {
-        buzz(0.5)
-      }, 700);
-      setTimeout(() => {
-        buzz(0.8)
-      }, 1400);
+      buzzThrice();
       clearInterval(timer);
-      isRunning = false;
+      timerState = 0;
+      doucment.body.style.backgroundColor = '#ff0000';
+      setTimeout(() => {
+        document.body.style.backgroundColor = '#ffffff';
+        updateTimer(set_seconds);
+      }, 500);
     }
 
     function resetTimer() {
       stopTimer();
       seconds = set_seconds;
-      updateTimer();
+      updateTimer(set_seconds);
     }
 
     function goFullscreen() {
@@ -331,7 +363,7 @@
     popoutButton.addEventListener('click', createPopout);
 
     // Initialize the timer display
-    updateTimer();
+    updateTimer(set_seconds);
   </script>
 </footer>
 
