@@ -191,7 +191,7 @@
     // Buzzer
     const SHORT_BUZZ_DURATION = 0.5;
     const LONG_BUZZ_DURATION = 0.8;
-    const BUZZ_INTERVAL_DURATION = 200;
+    const BUZZ_INTERVAL_DURATION = 0.2;
     function buzz(duration) {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -256,7 +256,7 @@
       }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 1000);
       setTimeout(() => {
         buzz(LONG_BUZZ_DURATION);
-      }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 1000);
+      }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
     }
 
     // Timer Settings
@@ -303,6 +303,7 @@
             setTimeout(() => {
               document.body.style.backgroundColor = '#FFFFFF';
             }, 500);
+            warning = set_warning;
 
             timer = setInterval(() => {
               seconds--;
@@ -314,10 +315,10 @@
 
                 stopTimer();
               }
-            }, set_seconds * 100 + 100);
+            }, 1000);
 
           }
-        }, set_warning * 100 + 100);
+        }, 1000);
       }
     }
 
@@ -325,13 +326,13 @@
 
     function stopTimer() {
       buzzThrice();
-      clearInterval(timer);
       timerState = 0;
-      doucment.body.style.backgroundColor = '#ff0000';
+      document.body.style.backgroundColor = '#ff0000';
       setTimeout(() => {
         document.body.style.backgroundColor = '#ffffff';
+        seconds = set_seconds;
         updateTimer(set_seconds);
-      }, 500);
+      }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
     }
 
     function resetTimer() {
