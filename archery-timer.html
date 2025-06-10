@@ -144,7 +144,6 @@
     <button id="reset">Reset</button>
     <button id="fullscreen">Fullscreen</button>
     <button id="btnPopout">Pop-out ↗</button>
-    <button id="btnTest" onclick="buzz(0)">test</button>
   </div>
 
 </body>
@@ -260,22 +259,26 @@
     }
 
     // Timer Settings
-    let set_seconds = 5;
-    let set_warning = 5;
+    let set_standby_time = 3;
+    let set_live_time = 10;
+    let set_warning_time = 5;
 
     // Timer functionality
-    let seconds = set_seconds;
-    let warning = set_warning;
-    let timer;
-    // let isRunning = false;
-    let timerState = 0;
-    // 0:stoped, 1:standby, 2:live
+    let timerDisplay = set_live_time;
+    let timerInterval;
+    const TIMER_STATE = {
+      STAND_BY: 0,
+      LIVE: 1,
+      WARNING: 2,
+      STOP: 3,
+    }
+    let timerState = TIMER_STATE.STOP;
 
     // Elements
     const greenSquare = document.getElementById("shoot");
     const yellowSquare = document.getElementById("warn");
     const redSquare = document.getElementById("stop");
-    const timerDisplay = document.getElementById('timer');
+    const timerDisplayLbl = document.getElementById('timer');
     const timerControlsDiv = document.getElementById('timer-controls');
     const startButton = document.getElementById('start');
     const stopButton = document.getElementById('btnStop');
@@ -285,48 +288,51 @@
 
     // Update the timer display
     function updateTimer(num) {
-      timerDisplay.textContent = num.toString();
+      timerDisplayLbl.textContent = num.toString();
     }
 
     // Start the timer
     // TODO: refactor indent hell
     function startTimer() {
-      if (timerState == 0) {
-        timerState = 1;
-        setIndicator(INDICATOR_STATE.YELLOW);
-        buzzTwice();
+      buzzTwice();
+      timerDisplay = set_standby_time;
+      updateTimer(timerDisplay);
+      flashBackground('yellow', 500);
+      setIndicator(INDICATOR_STATE.YELLOW);
+      timerState = TIMER_STATE.STAND_BY;
+      timerInterval = setInterval(() => {
+        timerDisplay--;
+        updateTimer(timerDisplay);
+        if (timerDisplay != 0 && timerState != TIMER_STATE.LIVE) return;
+        if (timerDisplay != set_warning_time && timerState == TIMER_STATE.LIVE) return;
 
-        timer = setInterval(() => {
-          warning--;
-          updateTimer(warning);
+        timerState++;
+        if (timerState == TIMER_STATE.LIVE) {
+          timerDisplay = set_live_time;
+          updateTimer(timerDisplay);
+          setIndicator(INDICATOR_STATE.GREEN);
+          flashBackground('green', 500);
+          buzzOnce();
+          return;
+        }
+        if (timerState == TIMER_STATE.WARNING) {
+          flashBackground('yellow', 500);
+          setIndicator(INDICATOR_STATE.YELLOW);
+          return;
+        }
+        if (timerState == TIMER_STATE.STOP) {
+          clearInterval(timerInterval);
+          stopTimer();
+        }
+      }, 1000);
+    }
 
-          if (warning <= 0) {
-            clearInterval(timer);
-            timerState = 2;
-            setIndicator(INDICATOR_STATE.GREEN);
-            buzzOnce();
-            document.body.style.backgroundColor = '#00ff00';
-            setTimeout(() => {
-              document.body.style.backgroundColor = '#FFFFFF';
-            }, 500);
-            warning = set_warning;
+    function flashBackground(color, duration) {
+      document.body.style.backgroundColor = color;
+      setTimeout(() => {
+        document.body.style.backgroundColor = '#FFFFFF';
+      }, duration);
 
-            timer = setInterval(() => {
-              seconds--;
-              updateTimer(seconds);
-
-              if (seconds <= 0) {
-                clearInterval(timer);
-                setIndicator(INDICATOR_STATE.RED);
-                timerState = 0;
-
-                stopTimer();
-              }
-            }, 1000);
-
-          }
-        }, 1000);
-      }
     }
 
     function lockButtons() {
@@ -342,20 +348,23 @@
     function stopTimer() {
       lockButtons();
       buzzThrice();
-      timerState = 0;
+      timerState = TIMER_STATE.STOP;
+      clearInterval(timerInterval);
+      setIndicator(INDICATOR_STATE.RED);
       document.body.style.backgroundColor = '#ff0000';
       setTimeout(() => {
         document.body.style.backgroundColor = '#ffffff';
-        seconds = set_seconds;
-        updateTimer(set_seconds);
+        seconds = set_live_time;
+        updateTimer(set_live_time);
         unlockButtons();
       }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
     }
 
+    //TODO:Make this reset to default settings?
     function resetTimer() {
       stopTimer();
-      seconds = set_seconds;
-      updateTimer(set_seconds);
+      timerDisplay = set_live_time;
+      updateTimer(timerDisplay);
     }
 
     function goFullscreen() {
@@ -416,7 +425,7 @@
     popoutButton.addEventListener('click', createPopout);
 
     // Initialize the timer display
-    updateTimer(set_seconds);
+    updateTimer(set_live_time);
     setIndicator(INDICATOR_STATE.RED);
   </script>
 </footer>
