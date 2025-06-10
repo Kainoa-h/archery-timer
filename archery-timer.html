@@ -129,9 +129,9 @@
       <div class="label">B</div>
     </div>
     <div class="column-squares">
-      <div class="square" id="shoot"></div>
-      <div class="square" id="warn"></div>
       <div class="square" id="stop"></div>
+      <div class="square" id="warn"></div>
+      <div class="square" id="shoot"></div>
     </div>
     <div class="column-timer">
       <div class="timer-display" id="timer">180</div>
@@ -271,6 +271,10 @@
     let timerState = 0;
     // 0:stoped, 1:standby, 2:live
 
+    // Elements
+    const greenSquare = document.getElementById("shoot");
+    const yellowSquare = document.getElementById("warn");
+    const redSquare = document.getElementById("stop");
     const timerDisplay = document.getElementById('timer');
     const timerControlsDiv = document.getElementById('timer-controls');
     const startButton = document.getElementById('start');
@@ -289,6 +293,7 @@
     function startTimer() {
       if (timerState == 0) {
         timerState = 1;
+        setIndicator(INDICATOR_STATE.YELLOW);
         buzzTwice();
 
         timer = setInterval(() => {
@@ -298,6 +303,7 @@
           if (warning <= 0) {
             clearInterval(timer);
             timerState = 2;
+            setIndicator(INDICATOR_STATE.GREEN);
             buzzOnce();
             document.body.style.backgroundColor = '#00ff00';
             setTimeout(() => {
@@ -311,6 +317,7 @@
 
               if (seconds <= 0) {
                 clearInterval(timer);
+                setIndicator(INDICATOR_STATE.RED);
                 timerState = 0;
 
                 stopTimer();
@@ -322,9 +329,18 @@
       }
     }
 
+    function lockButtons() {
+      document.querySelectorAll("button").forEach((x) => {x.disabled = true;});
+    }
+
+    function unlockButtons() {
+      document.querySelectorAll("button").forEach((x) => {x.disabled = false;});
+    }
+
     /* Button Functions */
 
     function stopTimer() {
+      lockButtons();
       buzzThrice();
       timerState = 0;
       document.body.style.backgroundColor = '#ff0000';
@@ -332,6 +348,7 @@
         document.body.style.backgroundColor = '#ffffff';
         seconds = set_seconds;
         updateTimer(set_seconds);
+        unlockButtons();
       }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
     }
 
@@ -356,6 +373,41 @@
       timerControlsDiv.style.visibility = 'visible';
     }
 
+    const INDICATOR_STATE = {
+      YELLOW: 0,
+      GREEN: 1,
+      RED: 2,
+      NONE: 3
+    };
+    function setIndicator(indicatorState) {
+      console.assert((typeof (indicatorState)) === "number", "Non number passed into setIndicator", indicatorState);
+      console.assert(Object.values(INDICATOR_STATE).includes(indicatorState), "Invalid state passed into setIndicator");
+      if (indicatorState == INDICATOR_STATE.YELLOW) {
+        redSquare.style.visibility = "hidden"
+        yellowSquare.style.visibility = "visible"
+        greenSquare.style.visibility = "hidden"
+        return;
+      }
+      if (indicatorState == INDICATOR_STATE.GREEN) {
+        redSquare.style.visibility = "hidden"
+        yellowSquare.style.visibility = "hidden"
+        greenSquare.style.visibility = "visible"
+        return;
+      }
+      if (indicatorState == INDICATOR_STATE.RED) {
+        redSquare.style.visibility = "visible"
+        yellowSquare.style.visibility = "hidden"
+        greenSquare.style.visibility = "hidden"
+        return;
+      }
+      if (indicatorState == INDICATOR_STATE.NONE) {
+        redSquare.style.visibility = "hidden"
+        yellowSquare.style.visibility = "hidden"
+        greenSquare.style.visibility = "hidden"
+        return;
+      }
+    }
+
     // Event listeners
     startButton.addEventListener('click', startTimer);
     stopButton.addEventListener('click', stopTimer);
@@ -365,6 +417,7 @@
 
     // Initialize the timer display
     updateTimer(set_seconds);
+    setIndicator(INDICATOR_STATE.RED);
   </script>
 </footer>
 
