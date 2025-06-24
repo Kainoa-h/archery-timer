@@ -9,7 +9,7 @@ Using vite and [vite-plugin-singlefile](https://github.com/richardtallent/vite-p
 - Runs easily almost anywhere
 - Accessible to less tech savvy people
 
-## Dependencies
+## Build Dependencies
 
 - vite 6.0
 - npm
