@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Readable Timer main</title>
+  <style>
+  </style>
+</head>
+
+<body id="app">
+  <div class="timer-container">
+    <div class="column-labels">
+      <div id="detail-left-lbl" class="label">A</div>
+      <div id="detail-right-lbl" class="label">B</div>
+    </div>
+    <div class="column-squares">
+      <div class="square" id="stop"></div>
+      <div class="square" id="warn"></div>
+      <div class="square" id="shoot"></div>
+    </div>
+    <div class="column-timer">
+      <div class="timer-display" id="timer">180</div>
+    </div>
+  </div>
+
+  <div id="timer-controls">
+    <button id="start">Start</button>
+    <button id="btnStop">Stop</button>
+    <button id="btnSettings">Settings</button>
+    <button id="btnPopout">Pop-out ↗</button>
+  </div>
+
+  <button id="fullscreen">&#x26F6;</button>
+  <div id="settings-modal-container"></div>
+
+</body>
+<footer>
+  <script type="module" src="/src/main.js"></script>
+</footer>
+
+</html>

@@ -1,0 +1,119 @@
+body {
+  font-family: 'Arial', sans-serif;
+  color: black;
+  margin: 0;
+  padding: 0;
+  background-color: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer-container {
+  display: flex;
+  width: 90%;
+  height: 80vh;
+  border-radius: 20px;
+}
+
+/* First Column - Detail column */
+.column-labels {
+  width: 15%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 20px 0;
+  font-size: 10vw;
+  font-weight: bold;
+}
+
+/* Second Column - Three squares */
+.column-squares {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 30px 0;
+}
+
+.square {
+  width: 80%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.square#shoot {
+  background-color: green;
+}
+
+.square#warn {
+  background-color: yellow;
+}
+
+.square#stop {
+  background-color: red;
+}
+
+/* Third Column - Timer display */
+.column-timer {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer-display {
+  font-size: 40vw;
+  letter-spacing: -3vw;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Controls */
+#timer-controls {
+  position: absolute;
+  bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+#fullscreen {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #2ecc71;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: #27ae60;
+}
+
+#btnStop {
+  background-color: #e74c3c;
+}
+
+#btnStop:hover {
+  background-color: #c0392b;
+}
+
+#btnSettings {
+  background-color: #f39c12;
+}
+
+#btnSettings:hover {
+  background-color: #d35400;
+}
