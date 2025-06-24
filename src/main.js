@@ -1,4 +1,6 @@
 import './style.css'
+
+//TODO: Move this to its own file
 //TODO:Create detail UI and picker
 // Popout html
 const popupControlsHTML = /*html*/`
@@ -58,6 +60,7 @@ const popupControlsHTML = /*html*/`
         </html>
         `;
 
+//TODO: Move this to its own file
 //TODO:Add default settings IKO...
 // settings modal html
 const settingsModalHTML = /*HTML*/ `
