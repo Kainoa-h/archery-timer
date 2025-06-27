@@ -100,6 +100,21 @@ const settingsModalHTML = /*HTML*/ `
       </div>
     `;
 
+
+// Elements
+const detailLeftLbl = document.getElementById("detail-left-lbl");
+const detailRightLbl = document.getElementById("detail-right-lbl");
+const greenSquare = document.getElementById("shoot");
+const yellowSquare = document.getElementById("warn");
+const redSquare = document.getElementById("stop");
+const timerDisplayLbl = document.getElementById('timer');
+const timerControlsDiv = document.getElementById('timer-controls');
+const startButton = document.getElementById('start');
+const stopButton = document.getElementById('btnStop');
+const settingsButton = document.getElementById('btnSettings');
+const fullscreenButton = document.getElementById('fullscreen')
+const popoutButton = document.getElementById('btnPopout');
+
 // Buzzer
 const SHORT_BUZZ_DURATION = 0.5;
 const LONG_BUZZ_DURATION = 0.8;
@@ -178,8 +193,19 @@ window.set_live_time = 10;
 window.set_warning_time = 5;
 window.set_double_detail = true;
 
+
 // Timer functionality
-let timerDisplay = window.set_live_time;
+Object.defineProperty(window, "timerDisplay", {
+  get() {
+    return this._timerDisplay;
+  },
+  set(x) {
+    this._timerDisplay = x;
+    timerDisplayLbl.textContent = x.toString();
+  }
+});
+window.timerDisplay = window.set_live_time;
+
 let timerInterval;
 const TIMER_STATE = {
   STAND_BY: 0,
@@ -188,20 +214,6 @@ const TIMER_STATE = {
   STOP: 3,
 }
 let timerState = TIMER_STATE.STOP;
-
-// Elements
-const detailLeftLbl = document.getElementById("detail-left-lbl");
-const detailRightLbl = document.getElementById("detail-right-lbl");
-const greenSquare = document.getElementById("shoot");
-const yellowSquare = document.getElementById("warn");
-const redSquare = document.getElementById("stop");
-const timerDisplayLbl = document.getElementById('timer');
-const timerControlsDiv = document.getElementById('timer-controls');
-const startButton = document.getElementById('start');
-const stopButton = document.getElementById('btnStop');
-const settingsButton = document.getElementById('btnSettings');
-const fullscreenButton = document.getElementById('fullscreen')
-const popoutButton = document.getElementById('btnPopout');
 
 var DETAIL_STATE = {
   d1: 1,
@@ -234,32 +246,22 @@ function nextDetail() {
   updateDetail();
 }
 
-// Update the timer display
-//FIX: This should not take in any parameter...
-//OR make this the only way to update timerDisplay
-window.updateTimer = function (num) {
-  timerDisplayLbl.textContent = num.toString();
-}
-
 //FIX: Bug when timer is started twice! add checks and make start/stop a single btn
 // Start the timer
 window.startTimer = function () {
   buzzTwice();
-  timerDisplay = window.set_standby_time;
-  updateTimer(timerDisplay);
+  window.timerDisplay = window.set_standby_time;
   flashBackground('yellow', 500);
   setIndicator(INDICATOR_STATE.YELLOW);
   timerState = TIMER_STATE.STAND_BY;
   timerInterval = setInterval(() => {
-    timerDisplay--;
-    updateTimer(timerDisplay);
-    if (timerDisplay != 0 && timerState != TIMER_STATE.LIVE) return;
-    if (timerDisplay != window.set_warning_time && timerState == TIMER_STATE.LIVE) return;
+    window.timerDisplay--;
+    if (window.timerDisplay != 0 && timerState != TIMER_STATE.LIVE) return;
+    if (window.timerDisplay != window.set_warning_time && timerState == TIMER_STATE.LIVE) return;
 
     timerState++;
     if (timerState == TIMER_STATE.LIVE) {
-      timerDisplay = window.set_live_time;
-      updateTimer(timerDisplay);
+      window.timerDisplay = window.set_live_time;
       setIndicator(INDICATOR_STATE.GREEN);
       flashBackground('green', 500);
       buzzOnce();
@@ -308,8 +310,7 @@ function stopTimer() {
   document.body.style.backgroundColor = '#ff0000';
   setTimeout(() => {
     document.body.style.backgroundColor = '#ffffff';
-    timerState = window.set_live_time;
-    updateTimer(window.set_live_time);
+    window.timerDisplay = window.set_live_time;
     unlockButtons();
   }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
 }
@@ -340,8 +341,7 @@ function saveSettingsFR(livetime, warntime, standbytime, doubledetail) {
   window.set_warning_time = warntime;
   window.set_standby_time = standbytime;
   window.set_double_detail = doubledetail;
-  timerDisplay = livetime;
-  updateTimer(timerDisplay);
+  window.timerDisplay = livetime;
   return true;
 }
 
@@ -404,5 +404,4 @@ fullscreenButton.addEventListener('click', goFullscreen);
 popoutButton.addEventListener('click', createPopout);
 
 // Initialize the timer display
-updateTimer(window.set_live_time);
 setIndicator(INDICATOR_STATE.RED);
