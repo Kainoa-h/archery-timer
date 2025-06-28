@@ -1,104 +1,10 @@
 import './style.css'
+import popupControlsHTML from './template/pop_out_controls.html?raw'
+import settingsModalHTML from './template/settings_modal.html?raw'
 
-//TODO: Move this to its own file
 //TODO:Create detail UI and picker
-// Popout html
-const popupControlsHTML = /*html*/`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Popup Controls</title>
-            <style>
-            body {
-                font-family: Arial, sans-serif;
-                background: #f0f0f0;
-                margin: 0;
-                padding: 20px;
-            }
-            h2 {
-                color: #444;
-            }
-            button {
-                padding: 10px 15px;
-                background-color: #28a745;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-            button:hover {
-                background-color: #218838;
-            }
-            </style>
-        </head>
-        <body>
-          <h2>Archery timer controls</h2>
-          <button onclick="window.opener.startTimer()">Start</button>
-          <button onclick="window.opener.stopTimer()">Stop</button>
-          <button onclick="window.opener.showMenu(); window.close()">Close</button>
-          <button onclick="openSettings()">Settings</button>
-          <div id="settings-modal-container"></div>
-        </body>
-        <script>
-          function openSettings() {
-            document.getElementById("settings-modal-container").innerHTML += window.opener.settingsModalHTML;
-            document.getElementById("set-live-time").value = window.opener.set_live_time;
-            document.getElementById("set-warning-time").value = window.opener.set_warning_time;
-            document.getElementById("set-standby-time").value = window.opener.set_standby_time;
-            document.getElementById("set-double-detail").checked = window.opener.set_double_detail;
-          }
-          function saveSettings() {
-            const livetime = document.getElementById("set-live-time").value;
-            const warntime = document.getElementById("set-warning-time").value;
-            const standbytime = document.getElementById("set-standby-time").value;
-            const doubledetail = document.getElementById("set-double-detail").checked;
-            let status = window.opener.saveSettingsFR(parseInt(livetime), parseInt(warntime), parseInt(standbytime), doubledetail);
-            if (status !== true) alert("invalid settings");
-            else document.getElementById("settings-modal").remove();
-          }
-        <\/script>
-        </html>
-        `;
 
-//TODO: Move this to its own file
 //TODO:Add default settings IKO...
-// settings modal html
-const settingsModalHTML = /*HTML*/ `
-      <div id="settings-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 1000;">
-        <div style="background: #ffffff; padding: 20px 30px; border-radius: 15px; width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); font-family: 'Arial', sans-serif;">
-          
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eeeeee; padding-bottom: 15px; margin-bottom: 20px;">
-            <h2 style="margin: 0; font-size: 1.8rem; color: #333;">Timer Settings</h2>
-            <button onclick="document.getElementById('settings-modal').remove()" style="font-size: 2rem; font-weight: bold; color: #777; cursor: pointer; border: none; background: none; padding: 0 10px;">&times;</button>
-          </div>
-
-          <div style="padding-top: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <label for="set-live-time" style="font-size: 1.1rem; color: #555;">Live Time (seconds):</label>
-              <input type="number" id="set-live-time" min="1" style="width: 80px; padding: 8px 12px; font-size: 1.1rem; border: 1px solid #cccccc; border-radius: 5px; text-align: center;">
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <label for="set-warning-time" style="font-size: 1.1rem; color: #555;">Warning Time (seconds):</label>
-              <input type="number" id="set-warning-time" min="1" style="width: 80px; padding: 8px 12px; font-size: 1.1rem; border: 1px solid #cccccc; border-radius: 5px; text-align: center;">
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <label for="set-standby-time" style="font-size: 1.1rem; color: #555;">Standby Time (seconds):</label>
-              <input type="number" id="set-standby-time" min="1" style="width: 80px; padding: 8px 12px; font-size: 1.1rem; border: 1px solid #cccccc; border-radius: 5px; text-align: center;">
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <label for="set-double-detail" style="font-size: 1.1rem; color: #555;">Double Detail:</label>
-              <input type="checkbox" id="set-double-detail" min="1" style="width: 80px; padding: 8px 12px; font-size: 1.1rem; border: 1px solid #cccccc; border-radius: 5px; text-align: center;">
-            </div>
-          </div>
-          
-          <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eeeeee; margin-top: 10px;">
-            <button style="background-color: #f0f0f0; color: #333;" onclick="document.getElementById('settings-modal').remove()">Cancel</button>
-            <button onclick="saveSettings()">Save</button>
-          </div>
-
-        </div>
-      </div>
-    `;
 
 
 // Elements
