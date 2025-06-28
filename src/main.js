@@ -301,7 +301,7 @@ function unlockButtons() {
   document.querySelectorAll("button").forEach((x) => { x.disabled = false; });
 }
 
-function stopTimer() {
+window.stopTimer = function () {
   lockButtons();
   buzzThrice();
   timerState = TIMER_STATE.STOP;
@@ -335,8 +335,16 @@ window.saveSettings = function () {
 }
 
 //TODO:add validation for double detail
-function saveSettingsFR(livetime, warntime, standbytime, doubledetail) {
-  if (livetime < 1 || warntime < 1 || standbytime < 1 || warntime >= livetime) return false;
+window.saveSettingsFR = function (livetime, warntime, standbytime, doubledetail) {
+  if (livetime < 1 || warntime < 1 || standbytime < 1 || warntime >= livetime) {
+    console.log({
+      livetime: livetime,
+      warntime: warntime,
+      standbytime: standbytime,
+      doubledetail: doubledetail
+    });
+    return false;
+  }
   window.set_live_time = livetime;
   window.set_warning_time = warntime;
   window.set_standby_time = standbytime;
