@@ -1,6 +1,10 @@
-import './style.css'
-import popupControlsHTML from './template/pop_out_controls.html?raw'
-import settingsModalHTML from './template/settings_modal.html?raw'
+import './style.css';
+import styleSheet from './style.css?raw';
+import popupControlsHTML_no_style from './template/pop_out_controls.html?raw';
+import settingsModalHTML from './template/settings_modal.html?raw';
+//TODO: fucked up styling of contorls
+const popupControlsHTML = popupControlsHTML_no_style.replace("<style></style>", "<style>" + styleSheet + "</style>");
+
 
 //TODO:Create detail UI and picker
 
@@ -15,7 +19,7 @@ const yellowSquare = document.getElementById("warn");
 const redSquare = document.getElementById("stop");
 const timerDisplayLbl = document.getElementById('timer');
 const timerControlsDiv = document.getElementById('timer-controls');
-const startButton = document.getElementById('start');
+const startButton = document.getElementById('btnStart');
 const stopButton = document.getElementById('btnStop');
 const settingsButton = document.getElementById('btnSettings');
 const fullscreenButton = document.getElementById('fullscreen')
@@ -152,9 +156,10 @@ function nextDetail() {
   updateDetail();
 }
 
-//FIX: Bug when timer is started twice! add checks and make start/stop a single btn
 // Start the timer
-window.startTimer = function () {
+window.startTimer = function (callback = false) {
+  startButton.hidden = true;
+  stopButton.hidden = false;
   buzzTwice();
   window.timerDisplay = window.set_standby_time;
   flashBackground('yellow', 500);
@@ -185,7 +190,7 @@ window.startTimer = function () {
         startTimer();
         return;
       }
-      stopTimer();
+      stopTimer(callback);
       if (window.set_double_detail) nextDetail();
     }
   }, 1000);
@@ -207,7 +212,7 @@ function unlockButtons() {
   document.querySelectorAll("button").forEach((x) => { x.disabled = false; });
 }
 
-window.stopTimer = function () {
+window.stopTimer = function (callback = false) {
   lockButtons();
   buzzThrice();
   timerState = TIMER_STATE.STOP;
@@ -218,6 +223,9 @@ window.stopTimer = function () {
     document.body.style.backgroundColor = '#ffffff';
     window.timerDisplay = window.set_live_time;
     unlockButtons();
+    startButton.hidden = false;
+    stopButton.hidden = true;
+    if (callback) callback();
   }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
 }
 

@@ -3,42 +3,33 @@
 
 <head>
   <title>Popup Controls</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h2 {
-      color: #444;
-    }
-
-    button {
-      padding: 10px 15px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #218838;
-    }
-  </style>
+  <style></style>
 </head>
 
 <body>
   <h2>Archery timer controls</h2>
-  <button onclick="window.opener.startTimer()">Start</button>
-  <button onclick="window.opener.stopTimer()">Stop</button>
-  <button onclick="window.opener.showMenu(); window.close()">Close</button>
-  <button onclick="openSettings()">Settings</button>
+  <br><br>
+  <div id="timer-controls">
+    <button id="btnStart">Start</button>
+    <button id="btnStop" hidden>Stop</button>
+    <button onclick="window.opener.showMenu(); window.close()">Close</button>
+    <button onclick="openSettings()">Settings</button>
+  </div>
   <div id="settings-modal-container"></div>
 </body>
 <script>
+  const btnStart = document.getElementById("btnStart");
+  const btnStop = document.getElementById("btnStop");
+  btnStart.onclick = function startTimer() {
+    btnStart.hidden = true;
+    btnStop.hidden = false;
+    window.opener.startTimer(() => {btnStart.hidden = false; btnStop.hidden = true;});
+  }
+  btnStop.onclick = function stopTimer() {
+    btnStart.hidden = false;
+    btnStop.hidden = true;
+    window.opener.stopTimer();
+  }
   function openSettings() {
     document.getElementById("settings-modal-container").innerHTML += window.opener.settingsModalHTML;
     document.getElementById("set-live-time").value = window.opener.set_live_time;
@@ -55,6 +46,7 @@
     if (status !== true) alert("invalid settings");
     else document.getElementById("settings-modal").remove();
   }
+
 </script>
 
 </html>
