@@ -158,6 +158,7 @@ function nextDetail() {
 
 // Start the timer
 window.startTimer = function (callback = false) {
+  console.log("start timer callback:", callback);
   startButton.hidden = true;
   stopButton.hidden = false;
   buzzTwice();
@@ -187,7 +188,7 @@ window.startTimer = function (callback = false) {
       clearInterval(timerInterval);
       if (window.set_double_detail && (detailState == DETAIL_STATE.d1 || detailState == DETAIL_STATE.d3)) {
         nextDetail();
-        startTimer();
+        startTimer(callback);
         return;
       }
       stopTimer(callback);
