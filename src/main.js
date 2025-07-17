@@ -24,6 +24,7 @@ const stopButton = document.getElementById('btnStop');
 const settingsButton = document.getElementById('btnSettings');
 const fullscreenButton = document.getElementById('fullscreen')
 const popoutButton = document.getElementById('btnPopout');
+window.popoutControls = false;
 
 // Buzzer
 const SHORT_BUZZ_DURATION = 0.5;
@@ -157,8 +158,7 @@ function nextDetail() {
 }
 
 // Start the timer
-window.startTimer = function (callback = false) {
-  console.log("start timer callback:", callback);
+window.startTimer = function () {
   startButton.hidden = true;
   stopButton.hidden = false;
   buzzTwice();
@@ -188,10 +188,10 @@ window.startTimer = function (callback = false) {
       clearInterval(timerInterval);
       if (window.set_double_detail && (detailState == DETAIL_STATE.d1 || detailState == DETAIL_STATE.d3)) {
         nextDetail();
-        startTimer(callback);
+        startTimer();
         return;
       }
-      stopTimer(callback);
+      stopTimer();
       if (window.set_double_detail) nextDetail();
     }
   }, 1000);
@@ -213,7 +213,7 @@ function unlockButtons() {
   document.querySelectorAll("button").forEach((x) => { x.disabled = false; });
 }
 
-window.stopTimer = function (callback = false) {
+window.stopTimer = function () {
   lockButtons();
   buzzThrice();
   timerState = TIMER_STATE.STOP;
@@ -226,7 +226,10 @@ window.stopTimer = function (callback = false) {
     unlockButtons();
     startButton.hidden = false;
     stopButton.hidden = true;
-    if (callback) callback();
+    if (window.popoutControls) {
+      window.popoutControls.btnStart.hidden = false;
+      window.popoutControls.btnStop.hidden = true;
+    }
   }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
 }
 
@@ -274,17 +277,17 @@ function goFullscreen() {
 
 function createPopout() {
   window.settingsModalHTML = settingsModalHTML;
-  const popout = window.open('', '', 'width=400, height=500');
-  if (popout) {
+  window.popoutControls = window.open('', '', 'width=400, height=500');
+  if (popoutControls) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(popupControlsHTML, 'text/html');
-    popout.document.head.innerHTML = doc.head.innerHTML;
-    popout.document.body.innerHTML = doc.body.innerHTML;
+    popoutControls.document.head.innerHTML = doc.head.innerHTML;
+    popoutControls.document.body.innerHTML = doc.body.innerHTML;
     const scripts = doc.getElementsByTagName('script');
     for (let i = 0; i < scripts.length; i++) {
-      const script = popout.document.createElement('script');
+      const script = popoutControls.document.createElement('script');
       script.textContent = scripts[i].textContent;
-      popout.document.body.appendChild(script);
+      popoutControls.document.body.appendChild(script);
     }
     timerControlsDiv.style.visibility = 'hidden';
   }

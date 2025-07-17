@@ -23,7 +23,7 @@
   btnStart.onclick = function startTimer() {
     btnStart.hidden = true;
     btnStop.hidden = false;
-    window.opener.startTimer(() => {btnStart.hidden = false; btnStop.hidden = true;});
+    window.opener.startTimer();
   }
   btnStop.onclick = function stopTimer() {
     btnStart.hidden = false;
