@@ -274,9 +274,19 @@ function goFullscreen() {
 function createPopout() {
   window.settingsModalHTML = settingsModalHTML;
   const popout = window.open('', '', 'width=400, height=500');
-  popout.document.write(popupControlsHTML);
-  popout.document.close();
-  timerControlsDiv.style.visibility = 'hidden';
+  if (popout) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(popupControlsHTML, 'text/html');
+    popout.document.head.innerHTML = doc.head.innerHTML;
+    popout.document.body.innerHTML = doc.body.innerHTML;
+    const scripts = doc.getElementsByTagName('script');
+    for (let i = 0; i < scripts.length; i++) {
+      const script = popout.document.createElement('script');
+      script.textContent = scripts[i].textContent;
+      popout.document.body.appendChild(script);
+    }
+    timerControlsDiv.style.visibility = 'hidden';
+  }
 }
 
 window.showMenu = function () {
