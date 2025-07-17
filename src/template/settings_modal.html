@@ -1,5 +1,48 @@
 <div id="settings-modal"
   style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 1000;">
+  <style>
+    .detail-selector {
+      display: flex;
+      border-radius: 7px;
+      background-color: #e0e0e0;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15);
+      padding: 3px;
+    }
+
+    .detail-selector button {
+      flex-grow: 1;
+      border: 1px solid transparent;
+      background-color: transparent;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      color: #555;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .detail-selector button:first-child {
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
+    }
+
+    .detail-selector button:last-child {
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+
+    .detail-selector button.selected {
+      background-color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border-color: #ccc;
+      font-weight: bold;
+      transform: translateY(-1px);
+    }
+
+    .detail-selector button:not(.selected):hover {
+      background-color: #efefef;
+    }
+  </style>
   <div
     style="background: #ffffff; padding: 20px 30px; border-radius: 15px; width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); font-family: 'Arial', sans-serif;">
 
@@ -25,6 +68,15 @@
         <label for="set-standby-time" style="font-size: 1.1rem; color: #555;">Standby Time (seconds):</label>
         <input type="number" id="set-standby-time" min="1"
           style="width: 80px; padding: 8px 12px; font-size: 1.1rem; border: 1px solid #cccccc; border-radius: 5px; text-align: center;">
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <label style="font-size: 1.1rem; color: #555;">Set Current Detail:</label>
+        <div class="detail-selector">
+          <button id="detail-btn-1" data-detail=1 onclick="btn_click_selectDetail(this)">1</button>
+          <button id="detail-btn-2" data-detail=2 onclick="btn_click_selectDetail(this)">2</button>
+          <button id="detail-btn-3" data-detail=3 onclick="btn_click_selectDetail(this)">2</button>
+          <button id="detail-btn-4" data-detail=4 onclick="btn_click_selectDetail(this)">1</button>
+        </div>
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <label for="set-double-detail" style="font-size: 1.1rem; color: #555;">Double Detail:</label>

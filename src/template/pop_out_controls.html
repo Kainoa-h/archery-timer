@@ -31,22 +31,35 @@
     window.opener.stopTimer();
   }
   function openSettings() {
-    document.getElementById("settings-modal-container").innerHTML += window.opener.settingsModalHTML;
+    const modalContainer = document.getElementById("settings-modal-container");
+    modalContainer.innerHTML = window.opener.settingsModalHTML;
     document.getElementById("set-live-time").value = window.opener.set_live_time;
     document.getElementById("set-warning-time").value = window.opener.set_warning_time;
     document.getElementById("set-standby-time").value = window.opener.set_standby_time;
     document.getElementById("set-double-detail").checked = window.opener.set_double_detail;
+    document.getElementById("detail-btn-" + window.opener.detailState).classList.add('selected');
   }
   function saveSettings() {
     const livetime = document.getElementById("set-live-time").value;
     const warntime = document.getElementById("set-warning-time").value;
     const standbytime = document.getElementById("set-standby-time").value;
     const doubledetail = document.getElementById("set-double-detail").checked;
-    let status = window.opener.saveSettingsFR(parseInt(livetime), parseInt(warntime), parseInt(standbytime), doubledetail);
+    const detail = parseInt(document.getElementsByClassName("detail-selector")[0].querySelector(".selected").dataset.detail);
+    let status = window.opener.saveSettingsFR(parseInt(livetime), parseInt(warntime), parseInt(standbytime), doubledetail, detail);
     if (status !== true) alert("invalid settings");
     else document.getElementById("settings-modal").remove();
   }
 
+  function btn_click_selectDetail(btn) {
+    const detailButtons = [
+      document.getElementById('detail-btn-1'),
+      document.getElementById('detail-btn-2'),
+      document.getElementById('detail-btn-3'),
+      document.getElementById('detail-btn-4'),
+    ];
+    detailButtons.forEach((x) => {x.classList.remove('selected')});
+    btn.classList.add('selected');
+  }
 </script>
 
 </html>

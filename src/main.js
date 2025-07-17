@@ -132,7 +132,9 @@ var DETAIL_STATE = {
   d3: 3,
   d4: 4
 }
-var detailState = DETAIL_STATE.d1;
+
+//TODO: make this a property that auto updates the view...
+window.detailState = DETAIL_STATE.d1;
 
 function updateDetail() {
   if (detailState == 1 || detailState == 4) {
@@ -233,13 +235,26 @@ window.stopTimer = function () {
   }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
 }
 
+window.btn_click_selectDetail = function (btn) {
+  const detailButtons = [
+    document.getElementById('detail-btn-1'),
+    document.getElementById('detail-btn-2'),
+    document.getElementById('detail-btn-3'),
+    document.getElementById('detail-btn-4'),
+  ];
+  detailButtons.forEach((x) => { x.classList.remove('selected') });
+  btn.classList.add('selected');
+}
+
 //TODO:lock settings button while timer is running
+//TODO: bruh settings modal needs to not be injected and removed like this..
 function openSettings() {
   document.getElementById("settings-modal-container").innerHTML += settingsModalHTML;
   document.getElementById("set-live-time").value = window.set_live_time;
   document.getElementById("set-warning-time").value = window.set_warning_time;
   document.getElementById("set-standby-time").value = window.set_standby_time;
   document.getElementById("set-double-detail").checked = window.set_double_detail;
+  document.getElementById("detail-btn-" + detailState).classList.add('selected');
 }
 
 window.saveSettings = function () {
@@ -247,13 +262,14 @@ window.saveSettings = function () {
   const warntime = document.getElementById("set-warning-time").value;
   const standbytime = document.getElementById("set-standby-time").value;
   const doubledetail = document.getElementById("set-double-detail").checked;
-  let status = saveSettingsFR(parseInt(livetime), parseInt(warntime), parseInt(standbytime), doubledetail);
+  const detail = parseInt(document.getElementsByClassName("detail-selector")[0].querySelector(".selected").dataset.detail);
+  let status = saveSettingsFR(parseInt(livetime), parseInt(warntime), parseInt(standbytime), doubledetail, detail);
   if (status !== true) alert("invalid settings");
   else document.getElementById("settings-modal").remove();
 }
 
 //TODO:add validation for double detail
-window.saveSettingsFR = function (livetime, warntime, standbytime, doubledetail) {
+window.saveSettingsFR = function (livetime, warntime, standbytime, doubledetail, detail) {
   if (livetime < 1 || warntime < 1 || standbytime < 1 || warntime >= livetime) {
     console.log({
       livetime: livetime,
@@ -268,6 +284,7 @@ window.saveSettingsFR = function (livetime, warntime, standbytime, doubledetail)
   window.set_standby_time = standbytime;
   window.set_double_detail = doubledetail;
   window.timerDisplay = livetime;
+  setDetail(detail);
   return true;
 }
 
