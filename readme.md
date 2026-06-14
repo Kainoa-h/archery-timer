@@ -7,7 +7,7 @@ Using vite and [vite-plugin-singlefile](https://github.com/richardtallent/vite-p
 ## Why html?
 
 - Runs easily almost anywhere
-- Accessible to less tech savvy people
+- Easy to distribute
 
 ## Build Dependencies
 
