@@ -25,15 +25,39 @@
     </div>
   </div>
 
-  <div id="timer-controls">
-    <button id="btnStart">Start</button>
-    <button id="btnStop" hidden>Stop</button>
-    <button id="btnSettings">Settings</button>
-    <button id="btnPopout">Pop-out ↗</button>
+  <div id="settings-lip">
+    <div class="settings-handle"></div>
+    <div id="settings-panel">
+      <form id="settings-form">
+        <div class="settings-row">
+          <label for="set-live-time">Live Time (seconds)</label>
+          <input type="number" id="set-live-time" min="1">
+        </div>
+        <div class="settings-row">
+          <label for="set-warning-time">Warning Time (seconds)</label>
+          <input type="number" id="set-warning-time" min="1">
+        </div>
+        <div class="settings-row">
+          <label for="set-standby-time">Standby Time (seconds)</label>
+          <input type="number" id="set-standby-time" min="1">
+        </div>
+        <div class="settings-row">
+          <label>Set Current Detail</label>
+          <div class="detail-selector">
+            <button type="button" class="detail-btn" data-detail="1">1</button>
+            <button type="button" class="detail-btn" data-detail="2">2</button>
+            <button type="button" class="detail-btn" data-detail="3">2</button>
+            <button type="button" class="detail-btn" data-detail="4">1</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <label for="set-double-detail">Double Detail</label>
+          <input type="checkbox" id="set-double-detail">
+        </div>
+        <div id="settings-error" class="settings-error"></div>
+      </form>
+    </div>
   </div>
-
-  <button id="fullscreen">&#x26F6;</button>
-  <div id="settings-modal-container"></div>
 
 </body>
 <footer>
