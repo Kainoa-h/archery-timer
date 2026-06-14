@@ -16,6 +16,8 @@ const standbyInput = document.getElementById('set-standby-time');
 const doubleDetailInput = document.getElementById('set-double-detail');
 const detailButtons = document.querySelectorAll('.detail-btn');
 const settingsError = document.getElementById('settings-error');
+const introModal = document.getElementById('intro-modal');
+const introClose = document.getElementById('intro-close');
 
 
 // Buzzer
@@ -367,3 +369,12 @@ window.setIndicator = function (indicatorState) {
 // Initialize
 populateForm();
 setIndicator(INDICATOR_STATE.RED);
+
+function closeIntroModal() {
+  introModal.classList.add('hidden');
+}
+
+introClose.addEventListener('click', closeIntroModal);
+introModal.addEventListener('click', (e) => {
+  if (e.target === introModal) closeIntroModal();
+});

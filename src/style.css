@@ -193,3 +193,149 @@ body {
   font-size: 0.85rem;
   text-align: center;
 }
+
+/* Intro modal */
+.intro-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.intro-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-content {
+  background: #ffffff;
+  padding: 28px 36px;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 85%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.intro-content h2 {
+  margin: 0 0 18px;
+  font-size: 1.7rem;
+  color: #333333;
+}
+
+.intro-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  color: #555555;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.intro-content li {
+  margin-bottom: 10px;
+  padding-left: 22px;
+  position: relative;
+}
+
+.intro-content li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #f39c12;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.intro-close {
+  background-color: #f39c12;
+  color: #ffffff;
+  border: none;
+  padding: 10px 28px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.intro-close:hover {
+  background-color: #d35400;
+}
+
+/* Intro modal */
+.intro-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.intro-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-content {
+  background: #ffffff;
+  padding: 28px 36px;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 85%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.intro-content h2 {
+  margin: 0 0 18px;
+  font-size: 1.7rem;
+  color: #333333;
+}
+
+.intro-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  color: #555555;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.intro-content li {
+  margin-bottom: 10px;
+  padding-left: 22px;
+  position: relative;
+}
+
+.intro-content li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #f39c12;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.intro-close {
+  background-color: #f39c12;
+  color: #ffffff;
+  border: none;
+  padding: 10px 28px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.intro-close:hover {
+  background-color: #d35400;
+}
