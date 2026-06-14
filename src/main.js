@@ -31,7 +31,7 @@ function buzz(duration) {
   // Main oscillator
   const oscillator = audioContext.createOscillator();
   oscillator.type = 'square';
-  oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+  oscillator.frequency.setValueAtTime(650, audioContext.currentTime);
 
   // Gain for shaping volume envelope
   const gainNode = audioContext.createGain();
@@ -40,7 +40,7 @@ function buzz(duration) {
   // Bandpass filter to mimic whistle tube resonance
   const filter = audioContext.createBiquadFilter();
   filter.type = 'bandpass';
-  filter.frequency.setValueAtTime(1200, audioContext.currentTime);
+  filter.frequency.setValueAtTime(950, audioContext.currentTime);
   filter.Q.setValueAtTime(15, audioContext.currentTime);
 
   // Create tremolo (amplitude modulation for "chirpy" effect)
