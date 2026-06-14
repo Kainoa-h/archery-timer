@@ -136,7 +136,6 @@ Object.defineProperty(window, "timerDisplay", {
 });
 window.timerDisplay = window.set_live_time;
 
-let timerHandle = null;
 let phaseEndTime = 0;
 let renderFrame = null;
 const TIMER_STATE = {
@@ -184,30 +183,13 @@ function renderTick() {
     renderFrame = null;
     return;
   }
-  const remaining = Math.max(0, phaseEndTime - performance.now());
-  window.timerDisplay = Math.ceil(remaining / 1000);
-  renderFrame = requestAnimationFrame(renderTick);
-}
-
-function scheduleTick() {
-  if (timerHandle) clearTimeout(timerHandle);
-  timerHandle = setTimeout(timerTick, 50);
-}
-
-function timerTick() {
-  if (timerState === TIMER_STATE.STOP) {
-    if (timerHandle) {
-      clearTimeout(timerHandle);
-      timerHandle = null;
-    }
-    return;
-  }
 
   const now = performance.now();
   const remaining = phaseEndTime - now;
 
-  if (timerState === TIMER_STATE.STAND_BY) {
+  window.timerDisplay = Math.max(0, Math.ceil(remaining / 1000));
 
+  if (timerState === TIMER_STATE.STAND_BY) {
     if (remaining <= 0) {
       timerState = TIMER_STATE.LIVE;
       phaseEndTime = now + window.set_live_time * 1000;
@@ -216,8 +198,7 @@ function timerTick() {
       flashBackground('green', 500);
       buzzOnce();
     }
-
-    scheduleTick();
+    renderFrame = requestAnimationFrame(renderTick);
     return;
   }
 
@@ -231,10 +212,6 @@ function timerTick() {
   if (remaining <= 0) {
     timerState = TIMER_STATE.STOP;
     phaseEndTime = 0;
-    if (timerHandle) {
-      clearTimeout(timerHandle);
-      timerHandle = null;
-    }
 
     if (window.set_double_detail && (detailState === DETAIL_STATE.d1 || detailState === DETAIL_STATE.d3)) {
       nextDetail();
@@ -247,7 +224,7 @@ function timerTick() {
     return;
   }
 
-  scheduleTick();
+  renderFrame = requestAnimationFrame(renderTick);
 }
 
 function finishTimer() {
@@ -266,7 +243,7 @@ function finishTimer() {
 }
 
 window.startTimer = function () {
-  if (timerState !== TIMER_STATE.STOP || timerHandle) return;
+  if (timerState !== TIMER_STATE.STOP) return;
 
   settingsLip.classList.add('hidden-running');
   settingsLip.classList.remove('open');
@@ -277,7 +254,6 @@ window.startTimer = function () {
   timerState = TIMER_STATE.STAND_BY;
   phaseEndTime = performance.now() + window.set_standby_time * 1000;
   renderFrame = requestAnimationFrame(renderTick);
-  scheduleTick();
 }
 
 function flashBackground(color, duration) {
@@ -292,10 +268,6 @@ window.stopTimer = function () {
   if (timerState === TIMER_STATE.STOP) return;
   timerState = TIMER_STATE.STOP;
   phaseEndTime = 0;
-  if (timerHandle) {
-    clearTimeout(timerHandle);
-    timerHandle = null;
-  }
   finishTimer();
 }
 
