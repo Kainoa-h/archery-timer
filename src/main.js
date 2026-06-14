@@ -111,7 +111,9 @@ Object.defineProperty(window, "timerDisplay", {
 });
 window.timerDisplay = window.set_live_time;
 
-let timerInterval;
+let timerHandle = null;
+let phaseEndTime = 0;
+let renderFrame = null;
 const TIMER_STATE = {
   STAND_BY: 0,
   LIVE: 1,
@@ -152,8 +154,95 @@ function nextDetail() {
   updateDetail();
 }
 
-// Start the timer
+function renderTick() {
+  if (timerState === TIMER_STATE.STOP) {
+    renderFrame = null;
+    return;
+  }
+  const remaining = Math.max(0, phaseEndTime - performance.now());
+  window.timerDisplay = Math.ceil(remaining / 1000);
+  renderFrame = requestAnimationFrame(renderTick);
+}
+
+function scheduleTick() {
+  if (timerHandle) clearTimeout(timerHandle);
+  timerHandle = setTimeout(timerTick, 50);
+}
+
+function timerTick() {
+  if (timerState === TIMER_STATE.STOP) {
+    if (timerHandle) {
+      clearTimeout(timerHandle);
+      timerHandle = null;
+    }
+    return;
+  }
+
+  const now = performance.now();
+  const remaining = phaseEndTime - now;
+
+  if (timerState === TIMER_STATE.STAND_BY) {
+
+    if (remaining <= 0) {
+      timerState = TIMER_STATE.LIVE;
+      phaseEndTime = now + window.set_live_time * 1000;
+      window.timerDisplay = window.set_live_time;
+      setIndicator(INDICATOR_STATE.GREEN);
+      flashBackground('green', 500);
+      buzzOnce();
+    }
+
+    scheduleTick();
+    return;
+  }
+
+  const warningStartTime = phaseEndTime - window.set_warning_time * 1000;
+  if (timerState === TIMER_STATE.LIVE && now >= warningStartTime) {
+    timerState = TIMER_STATE.WARNING;
+    flashBackground('yellow', 500);
+    setIndicator(INDICATOR_STATE.YELLOW);
+  }
+
+  if (remaining <= 0) {
+    timerState = TIMER_STATE.STOP;
+    phaseEndTime = 0;
+    if (timerHandle) {
+      clearTimeout(timerHandle);
+      timerHandle = null;
+    }
+
+    if (window.set_double_detail && (detailState === DETAIL_STATE.d1 || detailState === DETAIL_STATE.d3)) {
+      nextDetail();
+      window.startTimer();
+      return;
+    }
+
+    finishTimer();
+    if (window.set_double_detail) nextDetail();
+    return;
+  }
+
+  scheduleTick();
+}
+
+function finishTimer() {
+  if (renderFrame) {
+    cancelAnimationFrame(renderFrame);
+    renderFrame = null;
+  }
+  buzzThrice();
+  setIndicator(INDICATOR_STATE.RED);
+  document.body.style.backgroundColor = '#ff0000';
+  setTimeout(() => {
+    document.body.style.backgroundColor = '#ffffff';
+    window.timerDisplay = window.set_live_time;
+    settingsLip.classList.remove('hidden-running');
+  }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
+}
+
 window.startTimer = function () {
+  if (timerState !== TIMER_STATE.STOP || timerHandle) return;
+
   settingsLip.classList.add('hidden-running');
   settingsLip.classList.remove('open');
   buzzTwice();
@@ -161,35 +250,9 @@ window.startTimer = function () {
   flashBackground('yellow', 500);
   setIndicator(INDICATOR_STATE.YELLOW);
   timerState = TIMER_STATE.STAND_BY;
-  timerInterval = setInterval(() => {
-    window.timerDisplay--;
-    if (window.timerDisplay != 0 && timerState != TIMER_STATE.LIVE) return;
-    if (window.timerDisplay != window.set_warning_time && timerState == TIMER_STATE.LIVE) return;
-
-    timerState++;
-    if (timerState == TIMER_STATE.LIVE) {
-      window.timerDisplay = window.set_live_time;
-      setIndicator(INDICATOR_STATE.GREEN);
-      flashBackground('green', 500);
-      buzzOnce();
-      return;
-    }
-    if (timerState == TIMER_STATE.WARNING) {
-      flashBackground('yellow', 500);
-      setIndicator(INDICATOR_STATE.YELLOW);
-      return;
-    }
-    if (timerState == TIMER_STATE.STOP) {
-      clearInterval(timerInterval);
-      if (window.set_double_detail && (detailState == DETAIL_STATE.d1 || detailState == DETAIL_STATE.d3)) {
-        nextDetail();
-        startTimer();
-        return;
-      }
-      stopTimer();
-      if (window.set_double_detail) nextDetail();
-    }
-  }, 1000);
+  phaseEndTime = performance.now() + window.set_standby_time * 1000;
+  renderFrame = requestAnimationFrame(renderTick);
+  scheduleTick();
 }
 
 function flashBackground(color, duration) {
@@ -201,18 +264,14 @@ function flashBackground(color, duration) {
 }
 
 window.stopTimer = function () {
-  buzzThrice();
+  if (timerState === TIMER_STATE.STOP) return;
   timerState = TIMER_STATE.STOP;
-  clearInterval(timerInterval);
-  setIndicator(INDICATOR_STATE.RED);
-  document.body.style.backgroundColor = '#ff0000';
-  const stopDelay = (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000;
-  setTimeout(() => {
-    if (timerState !== TIMER_STATE.STOP) return;
-    document.body.style.backgroundColor = '#ffffff';
-    window.timerDisplay = window.set_live_time;
-    settingsLip.classList.remove('hidden-running');
-  }, stopDelay);
+  phaseEndTime = 0;
+  if (timerHandle) {
+    clearTimeout(timerHandle);
+    timerHandle = null;
+  }
+  finishTimer();
 }
 
 function selectDetailButton(detail) {
