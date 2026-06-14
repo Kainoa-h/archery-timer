@@ -93,9 +93,9 @@ function buzzThrice() {
 
 
 // Timer Settings
-window.set_standby_time = 3;
-window.set_live_time = 10;
-window.set_warning_time = 5;
+window.set_standby_time = 10;
+window.set_live_time = 180;
+window.set_warning_time = 10;
 window.set_double_detail = true;
 
 
@@ -373,6 +373,18 @@ detailButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
     detailButtons.forEach((b) => { b.classList.remove('selected'); });
     btn.classList.add('selected');
+    validateAndSave();
+  });
+});
+
+document.querySelectorAll('.preset-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    liveInput.value = btn.dataset.live;
+    warnInput.value = btn.dataset.warn;
+    standbyInput.value = btn.dataset.standby;
+    if (btn.dataset.double !== undefined) {
+      doubleDetailInput.checked = btn.dataset.double === '1';
+    }
     validateAndSave();
   });
 });
