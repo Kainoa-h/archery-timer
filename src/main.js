@@ -1,14 +1,4 @@
 import './style.css';
-import styleSheet from './style.css?raw';
-import popupControlsHTML_no_style from './template/pop_out_controls.html?raw';
-import settingsModalHTML from './template/settings_modal.html?raw';
-//TODO: fucked up styling of contorls
-const popupControlsHTML = popupControlsHTML_no_style.replace("<style></style>", "<style>" + styleSheet + "</style>");
-
-
-//TODO:Create detail UI and picker
-
-//TODO:Add default settings IKO...
 
 
 // Elements
@@ -18,13 +8,17 @@ const greenSquare = document.getElementById("shoot");
 const yellowSquare = document.getElementById("warn");
 const redSquare = document.getElementById("stop");
 const timerDisplayLbl = document.getElementById('timer');
-const timerControlsDiv = document.getElementById('timer-controls');
-const startButton = document.getElementById('btnStart');
-const stopButton = document.getElementById('btnStop');
-const settingsButton = document.getElementById('btnSettings');
-const fullscreenButton = document.getElementById('fullscreen')
-const popoutButton = document.getElementById('btnPopout');
-window.popoutControls = false;
+const settingsLip = document.getElementById('settings-lip');
+const settingsPanel = document.getElementById('settings-panel');
+const liveInput = document.getElementById('set-live-time');
+const warnInput = document.getElementById('set-warning-time');
+const standbyInput = document.getElementById('set-standby-time');
+const doubleDetailInput = document.getElementById('set-double-detail');
+const detailButtons = document.querySelectorAll('.detail-btn');
+const settingsError = document.getElementById('settings-error');
+const introModal = document.getElementById('intro-modal');
+const introClose = document.getElementById('intro-close');
+
 
 // Buzzer
 const SHORT_BUZZ_DURATION = 0.5;
@@ -35,8 +29,8 @@ function buzz(duration) {
 
   // Main oscillator
   const oscillator = audioContext.createOscillator();
-  oscillator.type = 'square'; // Sharp, buzzy tone
-  oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // Deeper than pure sine whistle
+  oscillator.type = 'square';
+  oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
 
   // Gain for shaping volume envelope
   const gainNode = audioContext.createGain();
@@ -45,15 +39,15 @@ function buzz(duration) {
   // Bandpass filter to mimic whistle tube resonance
   const filter = audioContext.createBiquadFilter();
   filter.type = 'bandpass';
-  filter.frequency.setValueAtTime(1200, audioContext.currentTime); // Focused around 1200 Hz
-  filter.Q.setValueAtTime(15, audioContext.currentTime); // Narrow resonance
+  filter.frequency.setValueAtTime(1200, audioContext.currentTime);
+  filter.Q.setValueAtTime(15, audioContext.currentTime);
 
   // Create tremolo (amplitude modulation for "chirpy" effect)
   const tremolo = audioContext.createOscillator();
-  tremolo.frequency.setValueAtTime(5, audioContext.currentTime); // Fast on/off ~25 Hz
+  tremolo.frequency.setValueAtTime(5, audioContext.currentTime);
 
   const tremoloGain = audioContext.createGain();
-  tremoloGain.gain.setValueAtTime(0.1, audioContext.currentTime); // Depth of modulation
+  tremoloGain.gain.setValueAtTime(0.1, audioContext.currentTime);
 
   // Route tremolo to gain control
   tremolo.connect(tremoloGain);
@@ -71,7 +65,7 @@ function buzz(duration) {
   // Envelope (quick fade in, quick fade out)
   const now = audioContext.currentTime;
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(9, now + 0.02); // Sharp attack
+  gainNode.gain.linearRampToValueAtTime(9, now + 0.02);
 
   oscillator.stop(now + duration);
   tremolo.stop(now + duration);
@@ -97,8 +91,8 @@ function buzzThrice() {
   }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
 }
 
+
 // Timer Settings
-// Has to be var so that it gets attached to the window object, making it accessible to the popout
 window.set_standby_time = 3;
 window.set_live_time = 10;
 window.set_warning_time = 5;
@@ -126,14 +120,13 @@ const TIMER_STATE = {
 }
 let timerState = TIMER_STATE.STOP;
 
-var DETAIL_STATE = {
+const DETAIL_STATE = {
   d1: 1,
   d2: 2,
   d3: 3,
   d4: 4
 }
 
-//TODO: make this a property that auto updates the view...
 window.detailState = DETAIL_STATE.d1;
 
 function updateDetail() {
@@ -161,8 +154,8 @@ function nextDetail() {
 
 // Start the timer
 window.startTimer = function () {
-  startButton.hidden = true;
-  stopButton.hidden = false;
+  settingsLip.classList.add('hidden-running');
+  settingsLip.classList.remove('open');
   buzzTwice();
   window.timerDisplay = window.set_standby_time;
   flashBackground('yellow', 500);
@@ -207,112 +200,136 @@ function flashBackground(color, duration) {
 
 }
 
-function lockButtons() {
-  document.querySelectorAll("button").forEach((x) => { x.disabled = true; });
-}
-
-function unlockButtons() {
-  document.querySelectorAll("button").forEach((x) => { x.disabled = false; });
-}
-
 window.stopTimer = function () {
-  lockButtons();
   buzzThrice();
   timerState = TIMER_STATE.STOP;
   clearInterval(timerInterval);
   setIndicator(INDICATOR_STATE.RED);
   document.body.style.backgroundColor = '#ff0000';
+  const stopDelay = (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000;
   setTimeout(() => {
+    if (timerState !== TIMER_STATE.STOP) return;
     document.body.style.backgroundColor = '#ffffff';
     window.timerDisplay = window.set_live_time;
-    unlockButtons();
-    startButton.hidden = false;
-    stopButton.hidden = true;
-    if (window.popoutControls) {
-      window.popoutControls.btnStart.hidden = false;
-      window.popoutControls.btnStop.hidden = true;
-    }
-  }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
+    settingsLip.classList.remove('hidden-running');
+  }, stopDelay);
 }
 
-window.btn_click_selectDetail = function (btn) {
-  const detailButtons = [
-    document.getElementById('detail-btn-1'),
-    document.getElementById('detail-btn-2'),
-    document.getElementById('detail-btn-3'),
-    document.getElementById('detail-btn-4'),
-  ];
-  detailButtons.forEach((x) => { x.classList.remove('selected') });
-  btn.classList.add('selected');
+function selectDetailButton(detail) {
+  detailButtons.forEach((btn) => { btn.classList.remove('selected'); });
+  const selected = document.querySelector(`.detail-btn[data-detail="${detail}"]`);
+  if (selected) selected.classList.add('selected');
 }
 
-//TODO:lock settings button while timer is running
-//TODO: bruh settings modal needs to not be injected and removed like this..
-function openSettings() {
-  document.getElementById("settings-modal-container").innerHTML += settingsModalHTML;
-  document.getElementById("set-live-time").value = window.set_live_time;
-  document.getElementById("set-warning-time").value = window.set_warning_time;
-  document.getElementById("set-standby-time").value = window.set_standby_time;
-  document.getElementById("set-double-detail").checked = window.set_double_detail;
-  document.getElementById("detail-btn-" + detailState).classList.add('selected');
+
+// Settings form
+let lastValidSettings = {
+  live: window.set_live_time,
+  warn: window.set_warning_time,
+  standby: window.set_standby_time,
+  double: window.set_double_detail,
+  detail: window.detailState
+};
+
+function populateForm() {
+  liveInput.value = window.set_live_time;
+  warnInput.value = window.set_warning_time;
+  standbyInput.value = window.set_standby_time;
+  doubleDetailInput.checked = window.set_double_detail;
+  selectDetailButton(window.detailState);
 }
 
-window.saveSettings = function () {
-  const livetime = document.getElementById("set-live-time").value;
-  const warntime = document.getElementById("set-warning-time").value;
-  const standbytime = document.getElementById("set-standby-time").value;
-  const doubledetail = document.getElementById("set-double-detail").checked;
-  const detail = parseInt(document.getElementsByClassName("detail-selector")[0].querySelector(".selected").dataset.detail);
-  let status = saveSettingsFR(parseInt(livetime), parseInt(warntime), parseInt(standbytime), doubledetail, detail);
-  if (status !== true) alert("invalid settings");
-  else document.getElementById("settings-modal").remove();
+function readForm() {
+  return {
+    live: parseInt(liveInput.value, 10),
+    warn: parseInt(warnInput.value, 10),
+    standby: parseInt(standbyInput.value, 10),
+    double: doubleDetailInput.checked,
+    detail: parseInt(settingsPanel.querySelector('.detail-btn.selected')?.dataset.detail, 10)
+  };
 }
 
-//TODO:add validation for double detail
-window.saveSettingsFR = function (livetime, warntime, standbytime, doubledetail, detail) {
-  if (livetime < 1 || warntime < 1 || standbytime < 1 || warntime >= livetime) {
-    console.log({
-      livetime: livetime,
-      warntime: warntime,
-      standbytime: standbytime,
-      doubledetail: doubledetail
-    });
+function showError(message) {
+  settingsError.textContent = message;
+}
+
+function clearError() {
+  settingsError.textContent = '';
+}
+
+function validateAndSave() {
+  const values = readForm();
+  if ([values.live, values.warn, values.standby, values.detail].some(Number.isNaN)) {
+    showError('All number fields must have valid values.');
     return false;
   }
-  window.set_live_time = livetime;
-  window.set_warning_time = warntime;
-  window.set_standby_time = standbytime;
-  window.set_double_detail = doubledetail;
-  window.timerDisplay = livetime;
-  setDetail(detail);
+  if (values.live < 1 || values.warn < 1 || values.standby < 1 || values.warn >= values.live) {
+    showError('All times must be ≥1 and warning time must be less than live time.');
+    return false;
+  }
+
+  window.set_live_time = values.live;
+  window.set_warning_time = values.warn;
+  window.set_standby_time = values.standby;
+  window.set_double_detail = values.double;
+  window.timerDisplay = values.live;
+  setDetail(values.detail);
+
+  lastValidSettings = { ...values };
+  clearError();
   return true;
 }
 
-function goFullscreen() {
-  document.documentElement.requestFullscreen();
+function revertSettings() {
+  liveInput.value = lastValidSettings.live;
+  warnInput.value = lastValidSettings.warn;
+  standbyInput.value = lastValidSettings.standby;
+  doubleDetailInput.checked = lastValidSettings.double;
+  selectDetailButton(lastValidSettings.detail);
+  clearError();
 }
 
-function createPopout() {
-  window.settingsModalHTML = settingsModalHTML;
-  window.popoutControls = window.open('', '', 'width=400, height=500');
-  if (popoutControls) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(popupControlsHTML, 'text/html');
-    popoutControls.document.head.innerHTML = doc.head.innerHTML;
-    popoutControls.document.body.innerHTML = doc.body.innerHTML;
-    const scripts = doc.getElementsByTagName('script');
-    for (let i = 0; i < scripts.length; i++) {
-      const script = popoutControls.document.createElement('script');
-      script.textContent = scripts[i].textContent;
-      popoutControls.document.body.appendChild(script);
-    }
-    timerControlsDiv.style.visibility = 'hidden';
+
+// Event listeners
+settingsLip.addEventListener('mouseenter', () => {
+  if (timerState === TIMER_STATE.STOP) {
+    populateForm();
+    settingsLip.classList.add('open');
   }
-}
+});
 
-window.showMenu = function () {
-  timerControlsDiv.style.visibility = 'visible';
-}
+settingsLip.addEventListener('mouseleave', () => {
+  if (!validateAndSave()) {
+    revertSettings();
+  }
+  settingsLip.classList.remove('open');
+});
+
+liveInput.addEventListener('change', validateAndSave);
+warnInput.addEventListener('change', validateAndSave);
+standbyInput.addEventListener('change', validateAndSave);
+doubleDetailInput.addEventListener('change', validateAndSave);
+
+detailButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    detailButtons.forEach((b) => { b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    validateAndSave();
+  });
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || settingsLip.classList.contains('open')) {
+    return;
+  }
+  e.preventDefault();
+  if (timerState === TIMER_STATE.STOP) {
+    window.startTimer();
+  } else {
+    window.stopTimer();
+  }
+});
 
 const INDICATOR_STATE = {
   YELLOW: 0,
@@ -349,12 +366,15 @@ window.setIndicator = function (indicatorState) {
   }
 }
 
-// Event listeners
-startButton.addEventListener('click', startTimer);
-stopButton.addEventListener('click', stopTimer);
-settingsButton.addEventListener('click', openSettings);
-fullscreenButton.addEventListener('click', goFullscreen);
-popoutButton.addEventListener('click', createPopout);
-
-// Initialize the timer display
+// Initialize
+populateForm();
 setIndicator(INDICATOR_STATE.RED);
+
+function closeIntroModal() {
+  introModal.classList.add('hidden');
+}
+
+introClose.addEventListener('click', closeIntroModal);
+introModal.addEventListener('click', (e) => {
+  if (e.target === introModal) closeIntroModal();
+});
