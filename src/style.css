@@ -146,6 +146,11 @@ body {
   height: 22px;
 }
 
+.settings-row input[type="range"] {
+  width: 80px;
+  accent-color: #f39c12;
+}
+
 .detail-selector {
   display: flex;
   border-radius: 7px;

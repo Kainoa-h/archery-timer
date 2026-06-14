@@ -14,6 +14,7 @@ const liveInput = document.getElementById('set-live-time');
 const warnInput = document.getElementById('set-warning-time');
 const standbyInput = document.getElementById('set-standby-time');
 const doubleDetailInput = document.getElementById('set-double-detail');
+const volumeInput = document.getElementById('set-volume');
 const detailButtons = document.querySelectorAll('.detail-btn');
 const settingsError = document.getElementById('settings-error');
 const introModal = document.getElementById('intro-modal');
@@ -65,7 +66,7 @@ function buzz(duration) {
   // Envelope (quick fade in, quick fade out)
   const now = audioContext.currentTime;
   gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(9, now + 0.02);
+  gainNode.gain.linearRampToValueAtTime(9 * window.volume, now + 0.02);
 
   oscillator.stop(now + duration);
   tremolo.stop(now + duration);
@@ -97,6 +98,7 @@ window.set_standby_time = 10;
 window.set_live_time = 180;
 window.set_warning_time = 10;
 window.set_double_detail = true;
+window.volume = 1;
 
 
 // Timer functionality
@@ -287,7 +289,8 @@ let lastValidSettings = {
   warn: window.set_warning_time,
   standby: window.set_standby_time,
   double: window.set_double_detail,
-  detail: window.detailState
+  detail: window.detailState,
+  volume: window.volume
 };
 
 function populateForm() {
@@ -295,6 +298,7 @@ function populateForm() {
   warnInput.value = window.set_warning_time;
   standbyInput.value = window.set_standby_time;
   doubleDetailInput.checked = window.set_double_detail;
+  volumeInput.value = window.volume;
   selectDetailButton(window.detailState);
 }
 
@@ -304,7 +308,8 @@ function readForm() {
     warn: parseInt(warnInput.value, 10),
     standby: parseInt(standbyInput.value, 10),
     double: doubleDetailInput.checked,
-    detail: parseInt(settingsPanel.querySelector('.detail-btn.selected')?.dataset.detail, 10)
+    detail: parseInt(settingsPanel.querySelector('.detail-btn.selected')?.dataset.detail, 10),
+    volume: parseFloat(volumeInput.value)
   };
 }
 
@@ -331,6 +336,7 @@ function validateAndSave() {
   window.set_warning_time = values.warn;
   window.set_standby_time = values.standby;
   window.set_double_detail = values.double;
+  window.volume = values.volume;
   window.timerDisplay = values.live;
   setDetail(values.detail);
 
@@ -344,6 +350,7 @@ function revertSettings() {
   warnInput.value = lastValidSettings.warn;
   standbyInput.value = lastValidSettings.standby;
   doubleDetailInput.checked = lastValidSettings.double;
+  volumeInput.value = lastValidSettings.volume;
   selectDetailButton(lastValidSettings.detail);
   clearError();
 }
@@ -368,6 +375,7 @@ liveInput.addEventListener('change', validateAndSave);
 warnInput.addEventListener('change', validateAndSave);
 standbyInput.addEventListener('change', validateAndSave);
 doubleDetailInput.addEventListener('change', validateAndSave);
+volumeInput.addEventListener('input', validateAndSave);
 
 detailButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
