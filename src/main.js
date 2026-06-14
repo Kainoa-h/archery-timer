@@ -15,6 +15,7 @@ const warnInput = document.getElementById('set-warning-time');
 const standbyInput = document.getElementById('set-standby-time');
 const doubleDetailInput = document.getElementById('set-double-detail');
 const volumeInput = document.getElementById('set-volume');
+const keepAliveInput = document.getElementById('set-keep-bluetooth-alive');
 const detailButtons = document.querySelectorAll('.detail-btn');
 const settingsError = document.getElementById('settings-error');
 const introModal = document.getElementById('intro-modal');
@@ -92,6 +93,27 @@ function buzzThrice() {
   }, (SHORT_BUZZ_DURATION + BUZZ_INTERVAL_DURATION) * 2000);
 }
 
+let keepAliveContext = null;
+
+function startKeepAlive() {
+  if (keepAliveContext) return;
+  keepAliveContext = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = keepAliveContext.createOscillator();
+  const gain = keepAliveContext.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(30, keepAliveContext.currentTime);
+  gain.gain.setValueAtTime(0.005, keepAliveContext.currentTime);
+  osc.connect(gain);
+  gain.connect(keepAliveContext.destination);
+  osc.start();
+}
+
+function stopKeepAlive() {
+  if (!keepAliveContext) return;
+  keepAliveContext.close();
+  keepAliveContext = null;
+}
+
 
 // Timer Settings
 window.set_standby_time = 10;
@@ -99,6 +121,7 @@ window.set_live_time = 180;
 window.set_warning_time = 10;
 window.set_double_detail = true;
 window.volume = 1;
+window.keep_bluetooth_alive = true;
 
 
 // Timer functionality
@@ -290,7 +313,8 @@ let lastValidSettings = {
   standby: window.set_standby_time,
   double: window.set_double_detail,
   detail: window.detailState,
-  volume: window.volume
+  volume: window.volume,
+  keepAlive: window.keep_bluetooth_alive
 };
 
 function populateForm() {
@@ -299,6 +323,7 @@ function populateForm() {
   standbyInput.value = window.set_standby_time;
   doubleDetailInput.checked = window.set_double_detail;
   volumeInput.value = window.volume;
+  keepAliveInput.checked = window.keep_bluetooth_alive;
   selectDetailButton(window.detailState);
 }
 
@@ -309,7 +334,8 @@ function readForm() {
     standby: parseInt(standbyInput.value, 10),
     double: doubleDetailInput.checked,
     detail: parseInt(settingsPanel.querySelector('.detail-btn.selected')?.dataset.detail, 10),
-    volume: parseFloat(volumeInput.value)
+    volume: parseFloat(volumeInput.value),
+    keepAlive: keepAliveInput.checked
   };
 }
 
@@ -337,6 +363,12 @@ function validateAndSave() {
   window.set_standby_time = values.standby;
   window.set_double_detail = values.double;
   window.volume = values.volume;
+  window.keep_bluetooth_alive = values.keepAlive;
+  if (window.keep_bluetooth_alive) {
+    startKeepAlive();
+  } else {
+    stopKeepAlive();
+  }
   window.timerDisplay = values.live;
   setDetail(values.detail);
 
@@ -351,6 +383,7 @@ function revertSettings() {
   standbyInput.value = lastValidSettings.standby;
   doubleDetailInput.checked = lastValidSettings.double;
   volumeInput.value = lastValidSettings.volume;
+  keepAliveInput.checked = lastValidSettings.keepAlive;
   selectDetailButton(lastValidSettings.detail);
   clearError();
 }
@@ -376,6 +409,7 @@ warnInput.addEventListener('change', validateAndSave);
 standbyInput.addEventListener('change', validateAndSave);
 doubleDetailInput.addEventListener('change', validateAndSave);
 volumeInput.addEventListener('input', validateAndSave);
+keepAliveInput.addEventListener('change', validateAndSave);
 
 detailButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -451,6 +485,7 @@ setIndicator(INDICATOR_STATE.RED);
 
 function closeIntroModal() {
   introModal.classList.add('hidden');
+  startKeepAlive();
 }
 
 introClose.addEventListener('click', closeIntroModal);
