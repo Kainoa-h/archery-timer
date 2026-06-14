@@ -1,4 +1,4 @@
-name: Build Vite App
+name: Build and Release
 
 on:
   push:
@@ -6,9 +6,12 @@ on:
       - "v*"
 
 jobs:
-  build:
-    name: Build Application
+  release:
+    name: Create Release
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -26,9 +29,11 @@ jobs:
       - name: Build the Vite app
         run: npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Rename HTML file
+        run: mv dist/index.html "dist/archery_timer_${{ github.ref_name }}.html"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: vite-build-${{ github.ref_name }}
-          path: dist/
-          retention-days: 7
+          files: dist/archery_timer_${{ github.ref_name }}.html
+          generate_release_notes: true
